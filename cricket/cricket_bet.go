@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // CricketPrematch represents the prematch data structure
@@ -148,4 +150,23 @@ func findMatchingResult(prematch *CricketPrematch, result *CricketResult) (*stru
 	}
 
 	return nil, fmt.Errorf("no matching result found for event ID %s", prematchEventID)
+}
+
+func parseScores(scoreStr string) (int, int, error) {
+	parts := strings.Split(scoreStr, "-")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("invalid score format: %s", scoreStr)
+	}
+
+	homeScore, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid home score: %v", err)
+	}
+
+	awayScore, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid away score: %v", err)
+	}
+
+	return homeScore, awayScore, nil
 }
