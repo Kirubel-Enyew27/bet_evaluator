@@ -1,104 +1,23 @@
 package cricket
 
 import (
-	"encoding/json"
+	"bet_evaluator/models"
+	"bet_evaluator/utils"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
 
-// CricketPrematch represents the prematch data structure
-type CricketPrematch struct {
-	Success int `json:"success"`
-	Results []struct {
-		EventID string `json:"event_id"`
-		Main    struct {
-			UpdatedAt string `json:"updated_at"`
-			SP        struct {
-				ToWinTheMatch struct {
-					ID   string `json:"id"`
-					Name string `json:"name"`
-					Odds []Odd  `json:"odds"`
-				} `json:"to_win_the_match"`
-			} `json:"sp"`
-		} `json:"main"`
-		Match struct {
-			SP struct {
-				MostMatchSixes struct {
-					Odds []Odd `json:"odds"`
-				} `json:"most_match_sixes"`
-				MostMatchFours struct {
-					Odds []Odd `json:"odds"`
-				} `json:"most_match_fours"`
-			} `json:"sp"`
-		} `json:"match"`
-	} `json:"results"`
-}
-
-// Odd represents a betting odd
-type Odd struct {
-	ID       string `json:"id"`
-	Odds     string `json:"odds"`
-	Name     string `json:"name"`
-	Header   string `json:"header"`
-	Handicap string `json:"handicap"`
-}
-
-// CricketResult represents the match result data
-type CricketResult struct {
-	Success int `json:"success"`
-	Results []struct {
-		ID          string `json:"id"`
-		SportID     string `json:"sport_id"`
-		Time        string `json:"time"`
-		TimeStatus  string `json:"time_status"` // 3 = match completed
-		League      League `json:"league"`
-		Home        Team   `json:"home"`
-		Away        Team   `json:"away"`
-		SS          string `json:"ss"` // Score string "117-217" (home-away)
-		Extra       Extra  `json:"extra"`
-		HasLineup   int    `json:"has_lineup"`
-		ConfirmedAt string `json:"confirmed_at"`
-	} `json:"results"`
-}
-
-type League struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	CC   string `json:"cc"`
-}
-
-type Team struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	ImageID string `json:"image_id"`
-	CC      string `json:"cc"`
-}
-
-type Extra struct {
-	StadiumData Stadium `json:"stadium_data"`
-}
-
-type Stadium struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	City         string `json:"city"`
-	Country      string `json:"country"`
-	Capacity     string `json:"capacity"`
-	GoogleCoords string `json:"googlecoords"`
-}
-
 func Evaluate() {
 	// Load and parse prematch data
-	prematch, err := loadPrematchData("cricket/cricket_prematch.json")
+	prematch, err := utils.ParseData[models.CricketPrematch]("cricket/cricket_prematch.json")
 	if err != nil {
 		log.Fatalf("Error loading prematch data: %v", err)
 	}
 
 	// Load and parse result data
-	result, err := loadResultData("cricket/cricket_result.json")
+	result, err := utils.ParseData[models.CricketResult]("cricket/cricket_result.json")
 	if err != nil {
 		log.Fatalf("Error loading result data: %v", err)
 	}
@@ -119,54 +38,18 @@ func Evaluate() {
 	evaluateBets(prematch, matchResult, homeScore, awayScore)
 }
 
-func loadPrematchData(filename string) (*CricketPrematch, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
-	}
-
-	var prematch CricketPrematch
-	if err := json.Unmarshal(data, &prematch); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON: %v", err)
-	}
-
-	if prematch.Success != 1 || len(prematch.Results) == 0 {
-		return nil, fmt.Errorf("invalid or empty prematch data")
-	}
-
-	return &prematch, nil
-}
-
-func loadResultData(filename string) (*CricketResult, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
-	}
-
-	var result CricketResult
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON: %v", err)
-	}
-
-	if result.Success != 1 || len(result.Results) == 0 {
-		return nil, fmt.Errorf("invalid or empty result data")
-	}
-
-	return &result, nil
-}
-
-func findMatchingResult(prematch *CricketPrematch, result *CricketResult) (*struct {
-	ID          string `json:"id"`
-	SportID     string `json:"sport_id"`
-	Time        string `json:"time"`
-	TimeStatus  string `json:"time_status"`
-	League      League `json:"league"`
-	Home        Team   `json:"home"`
-	Away        Team   `json:"away"`
-	SS          string `json:"ss"`
-	Extra       Extra  `json:"extra"`
-	HasLineup   int    `json:"has_lineup"`
-	ConfirmedAt string `json:"confirmed_at"`
+func findMatchingResult(prematch *models.CricketPrematch, result *models.CricketResult) (*struct {
+	ID          string        `json:"id"`
+	SportID     string        `json:"sport_id"`
+	Time        string        `json:"time"`
+	TimeStatus  string        `json:"time_status"`
+	League      models.League `json:"league"`
+	Home        models.Team   `json:"home"`
+	Away        models.Team   `json:"away"`
+	SS          string        `json:"ss"`
+	Extra       models.Extra  `json:"extra"`
+	HasLineup   int           `json:"has_lineup"`
+	ConfirmedAt string        `json:"confirmed_at"`
 }, error) {
 	prematchEventID := prematch.Results[0].EventID
 
@@ -201,18 +84,18 @@ func parseScores(scoreStr string) (int, int, error) {
 	return homeScore, awayScore, nil
 }
 
-func evaluateBets(prematch *CricketPrematch, result *struct {
-	ID          string `json:"id"`
-	SportID     string `json:"sport_id"`
-	Time        string `json:"time"`
-	TimeStatus  string `json:"time_status"`
-	League      League `json:"league"`
-	Home        Team   `json:"home"`
-	Away        Team   `json:"away"`
-	SS          string `json:"ss"`
-	Extra       Extra  `json:"extra"`
-	HasLineup   int    `json:"has_lineup"`
-	ConfirmedAt string `json:"confirmed_at"`
+func evaluateBets(prematch *models.CricketPrematch, result *struct {
+	ID          string        `json:"id"`
+	SportID     string        `json:"sport_id"`
+	Time        string        `json:"time"`
+	TimeStatus  string        `json:"time_status"`
+	League      models.League `json:"league"`
+	Home        models.Team   `json:"home"`
+	Away        models.Team   `json:"away"`
+	SS          string        `json:"ss"`
+	Extra       models.Extra  `json:"extra"`
+	HasLineup   int           `json:"has_lineup"`
+	ConfirmedAt string        `json:"confirmed_at"`
 }, homeScore, awayScore int) {
 	fmt.Printf("\n=== Match Evaluation ===\n")
 	fmt.Printf("League: %s\n", result.League.Name)

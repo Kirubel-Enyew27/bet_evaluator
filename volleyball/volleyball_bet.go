@@ -1,73 +1,26 @@
 package volleyball
 
 import (
-	"encoding/json"
+	"bet_evaluator/models"
+	"bet_evaluator/utils"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
 
-// PrematchResult represents the prematch odds data
-type PrematchResult struct {
-	FI      string `json:"FI"`
-	EventID string `json:"event_id"`
-	Main    struct {
-		SP struct {
-			GameLines struct {
-				Odds []struct {
-					ID       string `json:"id"`
-					Odds     string `json:"odds"`
-					Name     string `json:"name"`
-					Header   string `json:"header"`
-					Handicap string `json:"handicap"`
-				} `json:"odds"`
-			} `json:"game_lines"`
-			CorrectSetScore struct {
-				Odds []struct {
-					ID     string `json:"id"`
-					Odds   string `json:"odds"`
-					Name   string `json:"name"`
-					Header string `json:"header"`
-				} `json:"odds"`
-			} `json:"correct_set_score"`
-			MatchTotal struct {
-				Odds []struct {
-					ID       string `json:"id"`
-					Odds     string `json:"odds"`
-					Name     string `json:"name"`
-					Handicap string `json:"handicap"`
-				} `json:"odds"`
-			} `json:"match_total_odd_even"`
-		} `json:"sp"`
-	} `json:"main"`
-}
-
-// MatchResult represents a single match result
-type MatchResult struct {
-	EventID string `json:"id"`
-	Home    struct {
-		Name string `json:"name"`
-	} `json:"home"`
-	Away struct {
-		Name string `json:"name"`
-	} `json:"away"`
-	SS     string `json:"ss"`
-	Scores map[string]struct {
-		Home string `json:"home"`
-		Away string `json:"away"`
-	} `json:"scores"`
-}
-
-// ResultData contains multiple match results
-type ResultData struct {
-	Results []MatchResult `json:"results"`
-}
-
 func Evaluate() {
-	prematch := loadPrematchData("volleyball/volleyball_prematch.json")
-	result := loadResultData("volleyball/volleyball_result.json")
+	// Load and parse prematch data
+
+	prematch, err := utils.ParseData[models.PrematchData]("volleyball/volleyball_prematch.json")
+	if err != nil {
+		log.Fatalf("Error loading prematch data: %v", err)
+	}
+	// Load and parse result data
+	result, err := utils.ParseData[models.ResultData]("volleyball/volleyball_result.json")
+	if err != nil {
+		log.Fatalf("Error loading result data: %v", err)
+	}
 
 	if len(result.Results) == 0 {
 		log.Fatal("No result data found")
@@ -77,45 +30,15 @@ func Evaluate() {
 	fmt.Printf("\nMatch: %s vs %s\n", match.Home.Name, match.Away.Name)
 	fmt.Printf("Final Score: %s\n\n", match.SS)
 
-	evaluateWinnerMarket(prematch, match)
-	evaluateCorrectScoreMarket(prematch, match)
-	evaluateTotalPointsMarket(prematch, match)
-	evaluateHandicapMarket(prematch, match)
-	evaluateDoubleChanceMarket(prematch, match)
+	evaluateWinnerMarket(prematch.Results[0], match)
+	evaluateCorrectScoreMarket(prematch.Results[0], match)
+	evaluateTotalPointsMarket(prematch.Results[0], match)
+	evaluateHandicapMarket(prematch.Results[0], match)
+	evaluateDoubleChanceMarket(prematch.Results[0], match)
 
 }
 
-func loadPrematchData(filename string) PrematchResult {
-	file, err := os.ReadFile(filename)
-	if err != nil {
-		log.Fatalf("Error reading prematch file: %v", err)
-	}
-
-	var data struct {
-		Results []PrematchResult `json:"results"`
-	}
-	if err := json.Unmarshal(file, &data); err != nil {
-		log.Fatalf("Error parsing prematch JSON: %v", err)
-	}
-
-	return data.Results[0]
-}
-
-func loadResultData(filename string) ResultData {
-	file, err := os.ReadFile(filename)
-	if err != nil {
-		log.Fatalf("Error reading result file: %v", err)
-	}
-
-	var data ResultData
-	if err := json.Unmarshal(file, &data); err != nil {
-		log.Fatalf("Error parsing result JSON: %v", err)
-	}
-
-	return data
-}
-
-func evaluateWinnerMarket(pm PrematchResult, result MatchResult) {
+func evaluateWinnerMarket(pm models.PrematchResult, result models.MatchResult) {
 	fmt.Println("--- Match Winner (1X2) ---")
 
 	// Extract odds
@@ -150,7 +73,7 @@ func evaluateWinnerMarket(pm PrematchResult, result MatchResult) {
 	fmt.Println()
 }
 
-func evaluateCorrectScoreMarket(pm PrematchResult, result MatchResult) {
+func evaluateCorrectScoreMarket(pm models.PrematchResult, result models.MatchResult) {
 	fmt.Println("--- Correct Set Score ---")
 
 	// Get all correct score odds
@@ -171,7 +94,7 @@ func evaluateCorrectScoreMarket(pm PrematchResult, result MatchResult) {
 	fmt.Println()
 }
 
-func evaluateTotalPointsMarket(pm PrematchResult, result MatchResult) {
+func evaluateTotalPointsMarket(pm models.PrematchResult, result models.MatchResult) {
 	fmt.Println("--- Total Points ---")
 
 	// Calculate total points
@@ -210,7 +133,7 @@ func evaluateTotalPointsMarket(pm PrematchResult, result MatchResult) {
 	fmt.Println()
 }
 
-func evaluateHandicapMarket(pm PrematchResult, result MatchResult) {
+func evaluateHandicapMarket(pm models.PrematchResult, result models.MatchResult) {
 	fmt.Println("--- Handicap ---")
 
 	parts := strings.Split(result.SS, "-")
@@ -243,7 +166,7 @@ func evaluateHandicapMarket(pm PrematchResult, result MatchResult) {
 	fmt.Println()
 }
 
-func evaluateDoubleChanceMarket(pm PrematchResult, result MatchResult) {
+func evaluateDoubleChanceMarket(pm models.PrematchResult, result models.MatchResult) {
 	fmt.Println("--- Double Chance ---")
 
 	// Get 1X2 odds
