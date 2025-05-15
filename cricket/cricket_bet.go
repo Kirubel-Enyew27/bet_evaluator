@@ -170,3 +170,72 @@ func parseScores(scoreStr string) (int, int, error) {
 
 	return homeScore, awayScore, nil
 }
+
+func evaluateBets(prematch *CricketPrematch, result *struct {
+	ID          string `json:"id"`
+	SportID     string `json:"sport_id"`
+	Time        string `json:"time"`
+	TimeStatus  string `json:"time_status"`
+	League      League `json:"league"`
+	Home        Team   `json:"home"`
+	Away        Team   `json:"away"`
+	SS          string `json:"ss"`
+	Extra       Extra  `json:"extra"`
+	HasLineup   int    `json:"has_lineup"`
+	ConfirmedAt string `json:"confirmed_at"`
+}, homeScore, awayScore int) {
+	fmt.Printf("\n=== Match Evaluation ===\n")
+	fmt.Printf("League: %s\n", result.League.Name)
+	fmt.Printf("Teams: %s vs %s\n", result.Home.Name, result.Away.Name)
+	fmt.Printf("Venue: %s, %s\n", result.Extra.StadiumData.Name, result.Extra.StadiumData.City)
+	fmt.Printf("Result: %s (%d - %d)\n", result.SS, homeScore, awayScore)
+
+	fmt.Printf("\n--- Bet Evaluation Results ---\n")
+
+	// Evaluate match winner market
+	if len(prematch.Results[0].Main.SP.ToWinTheMatch.Odds) > 0 {
+		fmt.Println("\nMatch Winner Market:")
+		for _, odd := range prematch.Results[0].Main.SP.ToWinTheMatch.Odds {
+			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
+			if (odd.Name == "1" && homeScore > awayScore) || (odd.Name == "2" && awayScore > homeScore) {
+				fmt.Println("WON")
+			} else {
+				fmt.Println("LOST")
+			}
+		}
+	}
+
+	// Evaluate most sixes market
+	if len(prematch.Results[0].Match.SP.MostMatchSixes.Odds) > 0 {
+		fmt.Println("\nMost Match Sixes Market:")
+		for _, odd := range prematch.Results[0].Match.SP.MostMatchSixes.Odds {
+			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
+			if odd.Name == "1" && homeScore > awayScore { // Assuming home team hit more sixes if they scored more runs
+				fmt.Println("WON")
+			} else if odd.Name == "2" && awayScore > homeScore {
+				fmt.Println("WON")
+			} else if odd.Name == "Tie" && homeScore == awayScore {
+				fmt.Println("WON")
+			} else {
+				fmt.Println("LOST")
+			}
+		}
+	}
+
+	// Evaluate most fours market
+	if len(prematch.Results[0].Match.SP.MostMatchFours.Odds) > 0 {
+		fmt.Println("\nMost Match Fours Market:")
+		for _, odd := range prematch.Results[0].Match.SP.MostMatchFours.Odds {
+			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
+			if odd.Name == "1" && homeScore > awayScore {
+				fmt.Println("WON")
+			} else if odd.Name == "2" && awayScore > homeScore {
+				fmt.Println("WON")
+			} else if odd.Name == "Tie" && homeScore == awayScore {
+				fmt.Println("WON")
+			} else {
+				fmt.Println("LOST")
+			}
+		}
+	}
+}
