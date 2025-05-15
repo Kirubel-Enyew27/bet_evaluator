@@ -2,8 +2,11 @@ package volleyball
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // PrematchResult represents the prematch odds data
@@ -90,4 +93,39 @@ func loadResultData(filename string) ResultData {
 	}
 
 	return data
+}
+
+func evaluateWinnerMarket(pm PrematchResult, result MatchResult) {
+	fmt.Println("--- Match Winner (1X2) ---")
+
+	// Extract odds
+	var homeOdds, awayOdds string
+	for _, odd := range pm.Main.SP.GameLines.Odds {
+		if odd.Name == "Winner" && odd.Header == "1" {
+			homeOdds = odd.Odds
+		}
+		if odd.Name == "Winner" && odd.Header == "2" {
+			awayOdds = odd.Odds
+		}
+	}
+
+	// Determine outcome
+	parts := strings.Split(result.SS, "-")
+	homeScore, _ := strconv.Atoi(parts[0])
+	awayScore, _ := strconv.Atoi(parts[1])
+
+	fmt.Printf("%s to Win: %s => ", result.Home.Name, homeOdds)
+	if homeScore > awayScore {
+		fmt.Println("✅ WON")
+	} else {
+		fmt.Println("❌ LOST")
+	}
+
+	fmt.Printf("%s to Win: %s => ", result.Away.Name, awayOdds)
+	if awayScore > homeScore {
+		fmt.Println("✅ WON")
+	} else {
+		fmt.Println("❌ LOST")
+	}
+	fmt.Println()
 }
