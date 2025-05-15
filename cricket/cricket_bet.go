@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var index int
+
 func Evaluate() {
 	// Load and parse prematch data
 	prematch, err := utils.ParseData[models.CricketPrematch]("cricket/cricket_prematch.json")
@@ -21,6 +23,8 @@ func Evaluate() {
 	if err != nil {
 		log.Fatalf("Error loading result data: %v", err)
 	}
+
+	index = utils.GetRandomIndex(len(result.Results))
 
 	// Find matching result for our prematch data
 	matchResult, err := findMatchingResult(prematch, result)
@@ -51,7 +55,7 @@ func findMatchingResult(prematch *models.CricketPrematch, result *models.Cricket
 	HasLineup   int           `json:"has_lineup"`
 	ConfirmedAt string        `json:"confirmed_at"`
 }, error) {
-	prematchEventID := prematch.Results[0].EventID
+	prematchEventID := prematch.Results[index].EventID
 
 	for _, r := range result.Results {
 		if r.ID == prematchEventID {
@@ -106,9 +110,9 @@ func evaluateBets(prematch *models.CricketPrematch, result *struct {
 	fmt.Printf("\n--- Bet Evaluation Results ---\n")
 
 	// Evaluate match winner market
-	if len(prematch.Results[0].Main.SP.ToWinTheMatch.Odds) > 0 {
+	if len(prematch.Results[index].Main.SP.ToWinTheMatch.Odds) > 0 {
 		fmt.Println("\nMatch Winner Market:")
-		for _, odd := range prematch.Results[0].Main.SP.ToWinTheMatch.Odds {
+		for _, odd := range prematch.Results[index].Main.SP.ToWinTheMatch.Odds {
 			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
 			if (odd.Name == "1" && homeScore > awayScore) || (odd.Name == "2" && awayScore > homeScore) {
 				fmt.Println("WON")
@@ -119,9 +123,9 @@ func evaluateBets(prematch *models.CricketPrematch, result *struct {
 	}
 
 	// Evaluate most sixes market
-	if len(prematch.Results[0].Match.SP.MostMatchSixes.Odds) > 0 {
+	if len(prematch.Results[index].Match.SP.MostMatchSixes.Odds) > 0 {
 		fmt.Println("\nMost Match Sixes Market:")
-		for _, odd := range prematch.Results[0].Match.SP.MostMatchSixes.Odds {
+		for _, odd := range prematch.Results[index].Match.SP.MostMatchSixes.Odds {
 			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
 			if odd.Name == "1" && homeScore > awayScore { // Assuming home team hit more sixes if they scored more runs
 				fmt.Println("WON")
@@ -136,9 +140,9 @@ func evaluateBets(prematch *models.CricketPrematch, result *struct {
 	}
 
 	// Evaluate most fours market
-	if len(prematch.Results[0].Match.SP.MostMatchFours.Odds) > 0 {
+	if len(prematch.Results[index].Match.SP.MostMatchFours.Odds) > 0 {
 		fmt.Println("\nMost Match Fours Market:")
-		for _, odd := range prematch.Results[0].Match.SP.MostMatchFours.Odds {
+		for _, odd := range prematch.Results[index].Match.SP.MostMatchFours.Odds {
 			fmt.Printf("- %s @ %s => ", odd.Name, odd.Odds)
 			if odd.Name == "1" && homeScore > awayScore {
 				fmt.Println("WON")

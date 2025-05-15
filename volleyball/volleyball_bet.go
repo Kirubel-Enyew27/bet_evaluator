@@ -26,15 +26,18 @@ func Evaluate() {
 		log.Fatal("No result data found")
 	}
 
-	match := result.Results[0]
+	index := utils.GetRandomIndex(len(result.Results))
+	fmt.Println("Results", len(result.Results))
+	fmt.Println("Random index", index)
+	match := result.Results[index]
 	fmt.Printf("\nMatch: %s vs %s\n", match.Home.Name, match.Away.Name)
 	fmt.Printf("Final Score: %s\n\n", match.SS)
 
-	evaluateWinnerMarket(prematch.Results[0], match)
-	evaluateCorrectScoreMarket(prematch.Results[0], match)
-	evaluateTotalPointsMarket(prematch.Results[0], match)
-	evaluateHandicapMarket(prematch.Results[0], match)
-	evaluateDoubleChanceMarket(prematch.Results[0], match)
+	evaluateWinnerMarket(prematch.Results[index], match)
+	evaluateCorrectScoreMarket(prematch.Results[index], match)
+	evaluateTotalPointsMarket(prematch.Results[index], match)
+	evaluateHandicapMarket(prematch.Results[index], match)
+	evaluateDoubleChanceMarket(prematch.Results[index], match)
 
 }
 
