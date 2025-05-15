@@ -116,16 +116,16 @@ func evaluateWinnerMarket(pm PrematchResult, result MatchResult) {
 
 	fmt.Printf("%s to Win: %s => ", result.Home.Name, homeOdds)
 	if homeScore > awayScore {
-		fmt.Println("✅ WON")
+		fmt.Println("WON")
 	} else {
-		fmt.Println("❌ LOST")
+		fmt.Println("LOST")
 	}
 
 	fmt.Printf("%s to Win: %s => ", result.Away.Name, awayOdds)
 	if awayScore > homeScore {
-		fmt.Println("✅ WON")
+		fmt.Println("WON")
 	} else {
-		fmt.Println("❌ LOST")
+		fmt.Println("LOST")
 	}
 	fmt.Println()
 }
