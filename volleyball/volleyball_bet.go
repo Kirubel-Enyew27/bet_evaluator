@@ -189,3 +189,36 @@ func evaluateTotalPointsMarket(pm PrematchResult, result MatchResult) {
 	}
 	fmt.Println()
 }
+
+func evaluateHandicapMarket(pm PrematchResult, result MatchResult) {
+	fmt.Println("--- Handicap ---")
+
+	parts := strings.Split(result.SS, "-")
+	homeScore, _ := strconv.Atoi(parts[0])
+	awayScore, _ := strconv.Atoi(parts[1])
+	scoreDiff := homeScore - awayScore
+
+	for _, odd := range pm.Main.SP.GameLines.Odds {
+		if odd.Name == "Handicap" {
+			var handicap float64
+			if strings.HasPrefix(odd.Handicap, "-") {
+				fmt.Sscanf(odd.Handicap, "-%f", &handicap)
+				fmt.Printf("%s %s: %s => ", result.Home.Name, odd.Handicap, odd.Odds)
+				if float64(scoreDiff) > handicap {
+					fmt.Println("WON")
+				} else {
+					fmt.Println("LOST")
+				}
+			} else if strings.HasPrefix(odd.Handicap, "+") {
+				fmt.Sscanf(odd.Handicap, "+%f", &handicap)
+				fmt.Printf("%s %s: %s => ", result.Away.Name, odd.Handicap, odd.Odds)
+				if float64(-scoreDiff) < handicap {
+					fmt.Println("WON")
+				} else {
+					fmt.Println("LOST")
+				}
+			}
+		}
+	}
+	fmt.Println()
+}
