@@ -65,6 +65,26 @@ type ResultData struct {
 	Results []MatchResult `json:"results"`
 }
 
+func Evaluate() {
+	prematch := loadPrematchData("volleyball_prematch.json")
+	result := loadResultData("volleyball_result.json")
+
+	if len(result.Results) == 0 {
+		log.Fatal("No result data found")
+	}
+
+	match := result.Results[0]
+	fmt.Printf("\nMatch: %s vs %s\n", match.Home.Name, match.Away.Name)
+	fmt.Printf("Final Score: %s\n\n", match.SS)
+
+	evaluateWinnerMarket(prematch, match)
+	evaluateCorrectScoreMarket(prematch, match)
+	evaluateTotalPointsMarket(prematch, match)
+	evaluateHandicapMarket(prematch, match)
+	evaluateDoubleChanceMarket(prematch, match)
+
+}
+
 func loadPrematchData(filename string) PrematchResult {
 	file, err := os.ReadFile(filename)
 	if err != nil {
@@ -143,9 +163,9 @@ func evaluateCorrectScoreMarket(pm PrematchResult, result MatchResult) {
 		fmt.Printf("%s: %s => ", scoreType, odd.Odds)
 		if (odd.Header == "1" && result.SS == odd.Name) ||
 			(odd.Header == "2" && result.SS == odd.Name) {
-			fmt.Println("✅ WON")
+			fmt.Println("WON")
 		} else {
-			fmt.Println("❌ LOST")
+			fmt.Println("LOST")
 		}
 	}
 	fmt.Println()
