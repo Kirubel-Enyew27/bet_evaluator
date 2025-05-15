@@ -1,5 +1,11 @@
 package volleyball
 
+import (
+	"encoding/json"
+	"log"
+	"os"
+)
+
 // PrematchResult represents the prematch odds data
 type PrematchResult struct {
 	FI      string `json:"FI"`
@@ -54,4 +60,34 @@ type MatchResult struct {
 // ResultData contains multiple match results
 type ResultData struct {
 	Results []MatchResult `json:"results"`
+}
+
+func loadPrematchData(filename string) PrematchResult {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatalf("Error reading prematch file: %v", err)
+	}
+
+	var data struct {
+		Results []PrematchResult `json:"results"`
+	}
+	if err := json.Unmarshal(file, &data); err != nil {
+		log.Fatalf("Error parsing prematch JSON: %v", err)
+	}
+
+	return data.Results[0]
+}
+
+func loadResultData(filename string) ResultData {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatalf("Error reading result file: %v", err)
+	}
+
+	var data ResultData
+	if err := json.Unmarshal(file, &data); err != nil {
+		log.Fatalf("Error parsing result JSON: %v", err)
+	}
+
+	return data
 }
