@@ -261,22 +261,6 @@ func evaluateDoubleChanceMarket(pm PrematchResult, result MatchResult) {
 	homeScore, _ := strconv.Atoi(parts[0])
 	awayScore, _ := strconv.Atoi(parts[1])
 
-	// 1X - Home or Draw (but volleyball rarely has draws)
-	fmt.Printf("Home or Draw (1X): Derived from %s => ", homeOdds)
-	if homeScore >= awayScore {
-		fmt.Println("WON")
-	} else {
-		fmt.Println("LOST")
-	}
-
-	// X2 - Draw or Away
-	fmt.Printf("Draw or Away (X2): Derived from %s => ", awayOdds)
-	if awayScore >= homeScore {
-		fmt.Println("WON")
-	} else {
-		fmt.Println("LOST")
-	}
-
 	// 12 - Home or Away
 	fmt.Printf("Home or Away (12): Derived from %s/%s => ", homeOdds, awayOdds)
 	if homeScore != awayScore {
