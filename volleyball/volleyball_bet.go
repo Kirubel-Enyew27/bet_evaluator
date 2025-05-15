@@ -222,3 +222,47 @@ func evaluateHandicapMarket(pm PrematchResult, result MatchResult) {
 	}
 	fmt.Println()
 }
+
+func evaluateDoubleChanceMarket(pm PrematchResult, result MatchResult) {
+	fmt.Println("--- Double Chance ---")
+
+	// Get 1X2 odds
+	var homeOdds, awayOdds string
+	for _, odd := range pm.Main.SP.GameLines.Odds {
+		if odd.Name == "Winner" && odd.Header == "1" {
+			homeOdds = odd.Odds
+		}
+		if odd.Name == "Winner" && odd.Header == "2" {
+			awayOdds = odd.Odds
+		}
+	}
+
+	parts := strings.Split(result.SS, "-")
+	homeScore, _ := strconv.Atoi(parts[0])
+	awayScore, _ := strconv.Atoi(parts[1])
+
+	// 1X - Home or Draw (but volleyball rarely has draws)
+	fmt.Printf("Home or Draw (1X): Derived from %s => ", homeOdds)
+	if homeScore >= awayScore {
+		fmt.Println("WON")
+	} else {
+		fmt.Println("LOST")
+	}
+
+	// X2 - Draw or Away
+	fmt.Printf("Draw or Away (X2): Derived from %s => ", awayOdds)
+	if awayScore >= homeScore {
+		fmt.Println("WON")
+	} else {
+		fmt.Println("LOST")
+	}
+
+	// 12 - Home or Away
+	fmt.Printf("Home or Away (12): Derived from %s/%s => ", homeOdds, awayOdds)
+	if homeScore != awayScore {
+		fmt.Println("WON")
+	} else {
+		fmt.Println("LOST")
+	}
+	fmt.Println()
+}
