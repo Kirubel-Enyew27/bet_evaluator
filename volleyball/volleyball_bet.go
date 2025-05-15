@@ -26,10 +26,9 @@ func Evaluate() {
 		log.Fatal("No result data found")
 	}
 
-	index := utils.GetRandomIndex(len(result.Results))
-	fmt.Println("Results", len(result.Results))
-	fmt.Println("Random index", index)
-	match := result.Results[index]
+	index := utils.GetRandomIndex(len(prematch.Results))
+	index2 := utils.GetRandomIndex(len(result.Results))
+	match := result.Results[index2]
 	fmt.Printf("\nMatch: %s vs %s\n", match.Home.Name, match.Away.Name)
 	fmt.Printf("Final Score: %s\n\n", match.SS)
 

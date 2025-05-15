@@ -24,7 +24,7 @@ func Evaluate() {
 		log.Fatalf("Error loading result data: %v", err)
 	}
 
-	index = utils.GetRandomIndex(len(result.Results))
+	index = utils.GetRandomIndex(len(prematch.Results))
 
 	// Find matching result for our prematch data
 	matchResult, err := findMatchingResult(prematch, result)
