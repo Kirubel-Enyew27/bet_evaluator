@@ -1,5 +1,11 @@
 package cricket
 
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
 // CricketPrematch represents the prematch data structure
 type CricketPrematch struct {
 	Success int `json:"success"`
@@ -79,4 +85,40 @@ type Stadium struct {
 	Country      string `json:"country"`
 	Capacity     string `json:"capacity"`
 	GoogleCoords string `json:"googlecoords"`
+}
+
+func loadPrematchData(filename string) (*CricketPrematch, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %v", err)
+	}
+
+	var prematch CricketPrematch
+	if err := json.Unmarshal(data, &prematch); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %v", err)
+	}
+
+	if prematch.Success != 1 || len(prematch.Results) == 0 {
+		return nil, fmt.Errorf("invalid or empty prematch data")
+	}
+
+	return &prematch, nil
+}
+
+func loadResultData(filename string) (*CricketResult, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %v", err)
+	}
+
+	var result CricketResult
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %v", err)
+	}
+
+	if result.Success != 1 || len(result.Results) == 0 {
+		return nil, fmt.Errorf("invalid or empty result data")
+	}
+
+	return &result, nil
 }
