@@ -3,6 +3,7 @@ package cricket
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -87,6 +88,35 @@ type Stadium struct {
 	Country      string `json:"country"`
 	Capacity     string `json:"capacity"`
 	GoogleCoords string `json:"googlecoords"`
+}
+
+func Evaluate() {
+	// Load and parse prematch data
+	prematch, err := loadPrematchData("cricket_prematch.json")
+	if err != nil {
+		log.Fatalf("Error loading prematch data: %v", err)
+	}
+
+	// Load and parse result data
+	result, err := loadResultData("cricket_result.json")
+	if err != nil {
+		log.Fatalf("Error loading result data: %v", err)
+	}
+
+	// Find matching result for our prematch data
+	matchResult, err := findMatchingResult(prematch, result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Parse scores
+	homeScore, awayScore, err := parseScores(matchResult.SS)
+	if err != nil {
+		log.Fatalf("Error parsing scores: %v", err)
+	}
+
+	// Evaluate bets
+	evaluateBets(prematch, matchResult, homeScore, awayScore)
 }
 
 func loadPrematchData(filename string) (*CricketPrematch, error) {
