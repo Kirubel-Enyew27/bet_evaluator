@@ -66,8 +66,8 @@ type ResultData struct {
 }
 
 func Evaluate() {
-	prematch := loadPrematchData("volleyball_prematch.json")
-	result := loadResultData("volleyball_result.json")
+	prematch := loadPrematchData("volleyball/volleyball_prematch.json")
+	result := loadResultData("volleyball/volleyball_result.json")
 
 	if len(result.Results) == 0 {
 		log.Fatal("No result data found")

@@ -92,13 +92,13 @@ type Stadium struct {
 
 func Evaluate() {
 	// Load and parse prematch data
-	prematch, err := loadPrematchData("cricket_prematch.json")
+	prematch, err := loadPrematchData("cricket/cricket_prematch.json")
 	if err != nil {
 		log.Fatalf("Error loading prematch data: %v", err)
 	}
 
 	// Load and parse result data
-	result, err := loadResultData("cricket_result.json")
+	result, err := loadResultData("volleyball/volleyball_result.json")
 	if err != nil {
 		log.Fatalf("Error loading result data: %v", err)
 	}
