@@ -150,3 +150,42 @@ func evaluateCorrectScoreMarket(pm PrematchResult, result MatchResult) {
 	}
 	fmt.Println()
 }
+
+func evaluateTotalPointsMarket(pm PrematchResult, result MatchResult) {
+	fmt.Println("--- Total Points ---")
+
+	// Calculate total points
+	totalPoints := 0
+	for _, set := range result.Scores {
+		home, _ := strconv.Atoi(set.Home)
+		away, _ := strconv.Atoi(set.Away)
+		totalPoints += home + away
+	}
+
+	// Find total points market
+	for _, odd := range pm.Main.SP.GameLines.Odds {
+		if odd.Name == "Total" {
+			fmt.Printf("%s %s: %s (Actual: %d) => ",
+				odd.Name, odd.Handicap, odd.Odds, totalPoints)
+
+			if strings.HasPrefix(odd.Handicap, "O ") {
+				var line float64
+				fmt.Sscanf(odd.Handicap, "O %f", &line)
+				if float64(totalPoints) > line {
+					fmt.Println("WON")
+				} else {
+					fmt.Println("LOST")
+				}
+			} else if strings.HasPrefix(odd.Handicap, "U ") {
+				var line float64
+				fmt.Sscanf(odd.Handicap, "U %f", &line)
+				if float64(totalPoints) < line {
+					fmt.Println("WON")
+				} else {
+					fmt.Println("LOST")
+				}
+			}
+		}
+	}
+	fmt.Println()
+}
