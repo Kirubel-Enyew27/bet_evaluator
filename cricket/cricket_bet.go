@@ -122,3 +122,30 @@ func loadResultData(filename string) (*CricketResult, error) {
 
 	return &result, nil
 }
+
+func findMatchingResult(prematch *CricketPrematch, result *CricketResult) (*struct {
+	ID          string `json:"id"`
+	SportID     string `json:"sport_id"`
+	Time        string `json:"time"`
+	TimeStatus  string `json:"time_status"`
+	League      League `json:"league"`
+	Home        Team   `json:"home"`
+	Away        Team   `json:"away"`
+	SS          string `json:"ss"`
+	Extra       Extra  `json:"extra"`
+	HasLineup   int    `json:"has_lineup"`
+	ConfirmedAt string `json:"confirmed_at"`
+}, error) {
+	prematchEventID := prematch.Results[0].EventID
+
+	for _, r := range result.Results {
+		if r.ID == prematchEventID {
+			if r.TimeStatus != "3" {
+				return nil, fmt.Errorf("match not completed yet, status: %s", r.TimeStatus)
+			}
+			return &r, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no matching result found for event ID %s", prematchEventID)
+}
