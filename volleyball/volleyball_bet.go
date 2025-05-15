@@ -129,3 +129,24 @@ func evaluateWinnerMarket(pm PrematchResult, result MatchResult) {
 	}
 	fmt.Println()
 }
+
+func evaluateCorrectScoreMarket(pm PrematchResult, result MatchResult) {
+	fmt.Println("--- Correct Set Score ---")
+
+	// Get all correct score odds
+	for _, odd := range pm.Main.SP.CorrectSetScore.Odds {
+		scoreType := "Home " + odd.Name
+		if odd.Header == "2" {
+			scoreType = "Away " + odd.Name
+		}
+
+		fmt.Printf("%s: %s => ", scoreType, odd.Odds)
+		if (odd.Header == "1" && result.SS == odd.Name) ||
+			(odd.Header == "2" && result.SS == odd.Name) {
+			fmt.Println("✅ WON")
+		} else {
+			fmt.Println("❌ LOST")
+		}
+	}
+	fmt.Println()
+}
