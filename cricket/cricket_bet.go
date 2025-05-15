@@ -98,7 +98,7 @@ func Evaluate() {
 	}
 
 	// Load and parse result data
-	result, err := loadResultData("volleyball/volleyball_result.json")
+	result, err := loadResultData("cricket/cricket_result.json")
 	if err != nil {
 		log.Fatalf("Error loading result data: %v", err)
 	}
