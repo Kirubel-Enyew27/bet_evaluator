@@ -87,7 +87,7 @@ func evaluateCorrectScoreMarket(pm models.PrematchResult, result models.MatchRes
 
 		fmt.Printf("%s: %s => ", scoreType, odd.Odds)
 		if (odd.Header == "1" && result.SS == odd.Name) ||
-			(odd.Header == "2" && result.SS == odd.Name) {
+			(odd.Header == "2" && result.SS == utils.ReverseScore(odd.Name)) {
 			fmt.Println("WON")
 		} else {
 			fmt.Println("LOST")
